@@ -1,0 +1,32 @@
+# Virtual environments
+venv/
+.venv/
+env/
+*env/
+
+# Compiled Python files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Editor/IDE specific files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Build artifacts
+dist/
+build/
+*.egg
+*.egg-info/
+
+# Log files and temporary data
+*.log
+*.tmp
+temp/
+
+# Sensitive information (example)
+.env
+config.ini
