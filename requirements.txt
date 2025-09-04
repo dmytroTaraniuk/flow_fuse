@@ -1,0 +1,10 @@
+docling>=1.0.0
+transformers>=4.30.0
+Pillow>=10.0.0
+PyMuPDF>=1.23.0
+python-docx>=1.0.0
+huggingface-hub>=0.16.0
+tqdm~=4.67.1
+torchvision~=0.23.0
+sympy~=1.14.0
+pathlib~=1.0.1
