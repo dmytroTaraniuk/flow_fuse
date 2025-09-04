@@ -13,6 +13,7 @@ from text_extraction.extractors.ocr_extractor import HuggingFaceOCRExtractor
 from text_extraction.extractors.image_extractor import DefaultImageExtractor
 from text_extraction.processors.file_processor import FileProcessor
 from text_extraction.config.settings import Settings
+from text_extraction.utils.translation import UkrainianTranslator
 from tqdm.auto import tqdm
 
 # ---- existing setup_logging and compare() kept as-is ----
@@ -138,7 +139,8 @@ def process_one_file(
     text_extractors,
     image_extractor: DefaultImageExtractor,
     validation_path: Optional[Path],
-    logger: logging.Logger
+    logger: logging.Logger,
+    generate_description: bool = False
 ) -> Dict:
     """
     Runs the extraction pipeline for one file and (optionally) attaches validation.
@@ -192,6 +194,31 @@ def process_one_file(
             "has_content": bool(result.combined_markdown and result.combined_markdown != "No text content could be extracted from this file.")
         }
     }
+    
+    # Add image description if requested and this is an image file
+    if generate_description and result.file_type.value in ['image', 'scanned_document']:
+        try:
+            # Find the OCR extractor that supports description
+            ocr_extractor = None
+            for extractor in text_extractors:
+                if hasattr(extractor, 'generate_description') and extractor.generate_description:
+                    ocr_extractor = extractor
+                    break
+            
+            if ocr_extractor:
+                original_desc, ukrainian_desc = ocr_extractor.generate_image_description(input_path)
+                output["image_description"] = {
+                    "original": original_desc,
+                    "ukrainian": ukrainian_desc
+                }
+                logger.info(f"Generated image description for {input_path}")
+        except Exception as e:
+            logger.warning(f"Failed to generate image description for {input_path}: {e}")
+            output["image_description"] = {
+                "original": "",
+                "ukrainian": "",
+                "error": str(e)
+            }
 
     if validation_path and validation_path.exists():
         validations = load_json(validation_path)
@@ -252,6 +279,12 @@ def main():
         help="Folder path for disk offloading to save memory (default: ./offload)"
     )
 
+    parser.add_argument(
+        "--description",
+        action="store_true",
+        help="Generate image descriptions using OCR model and translate to Ukrainian. Results will include both original and translated descriptions."
+    )
+
     args = parser.parse_args()
 
     show_progress = (not args.no_progress) and (tqdm is not None)
@@ -308,6 +341,7 @@ def main():
         quantization=quant,
         device_map=args.device_map,
         offload_folder=args.offload_folder,
+        generate_description=args.description,
     )
 
     text_extractors = [DoclingTextExtractor(), ocr_extractor]
@@ -328,7 +362,8 @@ def main():
                     text_extractors,
                     image_extractor,
                     validation_mapping.get(p),
-                    logger
+                    logger,
+                    args.description
                 ): p for p in input_paths
             }
             # Progress bar for parallel branch: advance when each task finishes
@@ -360,7 +395,7 @@ def main():
             try:
                 results.append(
                     process_one_file(
-                        p, settings, classifier, text_extractors, image_extractor, validation_mapping.get(p), logger
+                        p, settings, classifier, text_extractors, image_extractor, validation_mapping.get(p), logger, args.description
                     )
                 )
             except Exception as e:
