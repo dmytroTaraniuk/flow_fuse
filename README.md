@@ -55,3 +55,28 @@ python main.py folder/*.pdf --jobs 4 --output-file results.json
 - transformers: HuggingFace OCR models
 - PyMuPDF: PDF handling
 - tqdm: Progress bars
+
+
+# Example
+
+### File Validation JSON
+
+Filename of json must match the document filename, e.g. `document.pdf` -> `document.pdf.json`
+```json
+{
+"markers": [
+    {
+      "label": "FIO",
+      "value": "Узаиров Рустам Расулович"
+    }
+  ]
+}
+```
+
+### Validation Map
+
+```json
+{
+    "4.pdf": "/home/ops/PycharmProjects/Test_Extraction/fuse_validations/4.pdf.validation.json"
+}
+```
