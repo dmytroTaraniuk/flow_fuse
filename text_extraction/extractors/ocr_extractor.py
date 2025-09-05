@@ -6,6 +6,8 @@ from typing import Optional, Literal, Dict, Any, Tuple
 
 import torch
 from PIL import Image
+from pillow_heif import register_heif_opener
+
 from transformers import AutoProcessor, AutoModelForVision2Seq
 
 try:
@@ -18,6 +20,8 @@ from ..models.file_types import FileType
 from ..utils.translation import UkrainianTranslator
 
 logger = logging.getLogger(__name__)
+
+register_heif_opener()
 
 
 class HuggingFaceOCRExtractor(TextExtractor):

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class UkrainianTranslator:
-    def __init__(self, model_id: str = "facebook/nllb-200-distilled-1.3B", max_batch_length: int = 400):
+    def __init__(self, model_id: str = "facebook/nllb-200-distilled-1.3B", max_batch_length: int = 100):
         self.model_id = model_id
         self.max_batch_length = max_batch_length  # Maximum characters per batch
         self._model: Optional[AutoModelForSeq2SeqLM] = None
@@ -198,6 +198,8 @@ class UkrainianTranslator:
             for i, batch in enumerate(batches):
                 logger.debug(f"Translating batch {i+1}/{len(batches)} ({len(batch)} chars)")
                 translated_batch = self._translate_batch(batch)
+                logger.debug(f"Batch to translate: '{batch}'")
+                logger.debug(f"Translated batch: '{translated_batch}'")
                 translated_batches.append(translated_batch)
 
             result = ' '.join(translated_batches)

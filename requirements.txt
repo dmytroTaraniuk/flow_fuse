@@ -8,3 +8,4 @@ tqdm~=4.67.1
 torchvision~=0.23.0
 sympy~=1.14.0
 pathlib~=1.0.1
+pillow-heif==1.1.0
